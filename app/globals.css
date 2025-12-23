@@ -1,26 +1,96 @@
 @import "tailwindcss";
 
+@theme {
+  --font-playfair: var(--font-playfair);
+  --font-lato: var(--font-lato);
+
+  --color-midnight: #0b1221;
+  --color-midnight-light: #152036;
+  --color-gold: #d4af37;
+  --color-gold-light: #f4c430;
+  --color-mist: #f5f5f5;
+  --color-mist-dim: #e0e0e0;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Fallback or specific usage if needed outside util classes */
+  --foreground-rgb: 245, 245, 245;
+  --background-start-rgb: 11, 18, 33;
+  --background-end-rgb: 11, 18, 33;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--color-mist);
+  background: var(--color-midnight);
+  font-family: var(--font-lato), sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-playfair), serif;
+  color: var(--color-gold);
+}
+
+h1 {
+  font-size: 3.5rem; /* Mobile default */
+  line-height: 1.1;
+}
+
+@media (min-width: 768px) {
+  h1 {
+    font-size: 5rem;
+  }
+}
+
+h2 {
+  font-size: 2.5rem;
+  line-height: 1.2;
+}
+
+@media (min-width: 768px) {
+  h2 {
+    font-size: 3.75rem; /* text-6xl equivalent */
+  }
+}
+
+h3 {
+  font-size: 2rem;
+}
+
+@media (min-width: 768px) {
+  h3 {
+    font-size: 2.5rem;
+  }
+}
+
+::selection {
+  background: var(--color-gold);
+  color: var(--color-midnight);
+}
+
+/* Micro-interactions */
+.btn-hover {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-hover:hover {
+  transform: translateY(-2px);
+}
+
+.btn-hover:active {
+  transform: scale(0.98);
+}
+
+.card-zoom {
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.group:hover .card-zoom {
+  transform: scale(1.05);
 }
