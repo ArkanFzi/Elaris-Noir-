@@ -51,7 +51,7 @@ export function CartDrawer() {
                   {/* Mock Item */}
                   <div className="flex gap-4">
                     <div className="w-20 h-24 bg-white/5 flex-shrink-0">
-                      <img src="https://images.unsplash.com/photo-1594121764658-00fc48a4365c?q=80&w=1000&auto=format&fit=crop" alt="Product" className="w-full h-full object-cover" />
+                      <img src="https://images.unsplash.com/photo-1594121764658-00fc48a4365c?q=80&w=1000&auto=format&fit=crop" alt="Product" crossOrigin="anonymous" className="w-full h-full object-cover" />
                     </div>
                     <div className="flex-1">
                       <div className="flex justify-between items-start mb-1">

@@ -6,11 +6,13 @@ import { ShoppingBag, Menu, X, Search, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/app/components/ui/Button";
 import { useCart } from "@/app/context/CartContext";
+import { useSearch } from "@/app/context/SearchContext";
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { toggleCart, cartCount } = useCart();
+  const { openSearch } = useSearch();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -24,6 +26,8 @@ export function Navbar() {
     { name: "Collection", href: "/collection" },
     { name: "Our Story", href: "/our-story" },
     { name: "Journal", href: "/journal" },
+    { name: "Contact", href: "/contact" },
+    { name: "Find Scent", href: "/quiz" },
   ];
 
   return (
@@ -54,7 +58,7 @@ export function Navbar() {
 
         {/* Icons */}
         <div className="hidden md:flex items-center gap-6">
-          <button className="text-mist hover:text-gold transition-colors">
+          <button onClick={openSearch} className="text-mist hover:text-gold transition-colors">
             <Search className="w-5 h-5" />
           </button>
           <Link href="/account/wishlist" className="text-mist hover:text-gold transition-colors">

@@ -76,21 +76,37 @@ h3 {
 
 /* Micro-interactions */
 .btn-hover {
-  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .btn-hover:hover {
   transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(212, 175, 55, 0.3);
 }
 
 .btn-hover:active {
-  transform: scale(0.98);
+  transform: translateY(0);
 }
 
-.card-zoom {
+.card-zoom img {
   transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.group:hover .card-zoom {
+.card-zoom:hover img {
   transform: scale(1.05);
+}
+
+/* Gradient animation for Hero background */
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-gradient-shift {
+  background-size: 200% 200%;
+  animation: gradient-shift 15s ease infinite;
 }

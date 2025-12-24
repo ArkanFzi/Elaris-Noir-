@@ -19,6 +19,7 @@ export function Spotlight() {
                 <img 
                     src="https://images.unsplash.com/photo-1594035910387-fea4779426e9?q=80&w=2670&auto=format&fit=crop" 
                     alt="Elaris Noir Signature" 
+                    crossOrigin="anonymous"
                     className="w-full h-full object-cover opacity-90 transition-transform duration-1000 hover:scale-105"
                 />
             </motion.div>

@@ -72,7 +72,7 @@ export function CheckoutForm() {
                  <div className="space-y-4 mb-6">
                     <div className="flex gap-4 items-center">
                         <div className="w-16 h-16 bg-midnight border border-white/10 rounded-sm overflow-hidden relative">
-                             <img src="https://images.unsplash.com/photo-1594121764658-00fc48a4365c?q=80&w=1000&auto=format&fit=crop" alt="Product" className="w-full h-full object-cover" />
+                             <img src="https://images.unsplash.com/photo-1594121764658-00fc48a4365c?q=80&w=1000&auto=format&fit=crop" alt="Product" crossOrigin="anonymous" className="w-full h-full object-cover" />
                              <span className="absolute top-0 right-0 bg-gold text-midnight text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full transform translate-x-1/2 -translate-y-1/2">1</span>
                         </div>
                         <div className="flex-1">
