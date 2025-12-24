@@ -42,16 +42,17 @@ export function NewsletterPopup() {
              initial={{ opacity: 0, scale: 0.9, y: 20 }}
              animate={{ opacity: 1, scale: 1, y: 0 }}
              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-             className="relative bg-midnight border border-gold/20 w-full max-w-lg p-8 md:p-12 text-center shadow-2xl overflow-hidden"
+             className="relative bg-midnight border border-gold/20 w-full max-w-lg p-6 md:p-12 text-center shadow-2xl overflow-hidden"
            >
                 {/* Decorative Elements */}
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-gold to-transparent" />
                 
                 <button 
                     onClick={handleClose}
-                    className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors"
+                    className="absolute top-2 right-2 p-2 text-gray-500 hover:text-white transition-colors"
+                    aria-label="Close newsletter popup"
                 >
-                    <X className="w-5 h-5" />
+                    <X className="w-6 h-6" />
                 </button>
 
                 <Mail className="w-8 h-8 text-gold mx-auto mb-6" />

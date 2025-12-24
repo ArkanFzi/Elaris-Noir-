@@ -75,20 +75,22 @@ export function CartDrawer() {
               )}
             </div>
 
-            <div className="p-6 border-t border-white/5 bg-midnight-light">
-              <div className="flex justify-between mb-4 text-sm">
-                <span className="text-gray-400">Subtotal</span>
-                <span className="text-white">$180.00</span>
+            {cartCount > 0 && (
+              <div className="p-6 border-t border-white/5 bg-midnight-light">
+                <div className="flex justify-between mb-4 text-sm">
+                  <span className="text-gray-400">Subtotal</span>
+                  <span className="text-white">$180.00</span>
+                </div>
+                <p className="text-xs text-gray-500 mb-6 font-light">
+                  Shipping and taxes calculated at checkout.
+                </p>
+                <Link href="/checkout" onClick={closeCart}>
+                  <Button className="w-full" size="lg" variant="gold">
+                    Checkout
+                  </Button>
+                </Link>
               </div>
-              <p className="text-xs text-gray-500 mb-6 font-light">
-                Shipping and taxes calculated at checkout.
-              </p>
-              <Link href="/checkout" onClick={closeCart}>
-                <Button className="w-full" size="lg" variant="gold">
-                  Checkout
-                </Button>
-              </Link>
-            </div>
+            )}
           </motion.div>
         </>
       )}
