@@ -1,18 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import Link from "next/link";
 import { ShoppingBag, Menu, X, Search, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/app/components/ui/Button";
 import { useCart } from "@/app/context/CartContext";
 import { useSearch } from "@/app/context/SearchContext";
+import { AuthContext } from "../../context/AuthContext";
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { toggleCart, cartCount } = useCart();
   const { openSearch } = useSearch();
+  const { token, user, logout } = useContext(AuthContext);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -34,12 +35,17 @@ export function Navbar() {
     <header
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-transparent",
-        isScrolled ? "bg-midnight/90 backdrop-blur-md border-white/5 py-4 shadow-xl" : "bg-transparent py-6"
+        isScrolled
+          ? "bg-midnight/90 backdrop-blur-md border-white/5 py-4 shadow-xl"
+          : "bg-transparent py-6"
       )}
     >
       <div className="container mx-auto px-6 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="font-serif text-2xl md:text-3xl font-bold tracking-widest text-gold z-50">
+        <Link
+          href="/"
+          className="font-serif text-2xl md:text-3xl font-bold tracking-widest text-gold z-50"
+        >
           ELARIS NOIR
         </Link>
 
@@ -58,13 +64,22 @@ export function Navbar() {
 
         {/* Icons */}
         <div className="hidden md:flex items-center gap-6">
-          <button onClick={openSearch} className="text-mist hover:text-gold transition-colors">
+          <button
+            onClick={openSearch}
+            className="text-mist hover:text-gold transition-colors"
+          >
             <Search className="w-5 h-5" />
           </button>
-          <Link href="/account/wishlist" className="text-mist hover:text-gold transition-colors">
+          <Link
+            href="/account/wishlist"
+            className="text-mist hover:text-gold transition-colors"
+          >
             <Heart className="w-5 h-5" />
           </Link>
-          <button onClick={toggleCart} className="relative text-mist hover:text-gold transition-colors">
+          <button
+            onClick={toggleCart}
+            className="relative text-mist hover:text-gold transition-colors"
+          >
             <ShoppingBag className="w-5 h-5" />
             <span className="absolute -top-1 -right-1 bg-gold text-midnight text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold">
               {cartCount}
@@ -72,12 +87,48 @@ export function Navbar() {
           </button>
         </div>
 
+        {/* Auth Buttons - Desktop */}
+        <div className="hidden md:flex items-center gap-4">
+          {token ? (
+            <>
+              <span className="text-sm text-mist">
+                Welcome, {user?.firstName} {user?.lastName}
+              </span>
+              <button
+                onClick={logout}
+                className="px-4 py-2 bg-red-500 text-midnight rounded hover:bg-red-600 transition-all"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="px-4 py-2 bg-gold text-midnight rounded hover:bg-gold-light transition-all"
+              >
+                Login
+              </Link>
+              <Link
+                href="/register"
+                className="px-4 py-2 bg-gold text-midnight rounded hover:bg-gold-light transition-all"
+              >
+                Register
+              </Link>
+            </>
+          )}
+        </div>
+
         {/* Mobile Toggle */}
         <button
           className="md:hidden text-mist z-50"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
-          {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          {isMobileMenuOpen ? (
+            <X className="w-6 h-6" />
+          ) : (
+            <Menu className="w-6 h-6" />
+          )}
         </button>
 
         {/* Mobile Menu Overlay */}
@@ -94,12 +145,41 @@ export function Navbar() {
               </Link>
             ))}
             <div className="flex gap-6 mt-4">
-               <button className="text-mist hover:text-gold">
+              <button className="text-mist hover:text-gold">
                 <Search className="w-6 h-6" />
               </button>
-              <button onClick={toggleCart} className="relative text-mist hover:text-gold">
+              <button
+                onClick={toggleCart}
+                className="relative text-mist hover:text-gold"
+              >
                 <ShoppingBag className="w-6 h-6" />
               </button>
+            </div>
+            {/* Auth Buttons - Mobile */}
+            <div className="flex flex-col gap-4">
+              {token ? (
+                <button
+                  onClick={logout}
+                  className="w-full px-4 py-2 bg-red-500 rounded text-center text-sm font-semibold hover:bg-red-600 transition-all"
+                >
+                  Logout
+                </button>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className="w-full px-4 py-2 bg-blue-500 rounded text-center text-sm font-semibold hover:bg-blue-600 transition-all"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="w-full px-4 py-2 bg-green-500 rounded text-center text-sm font-semibold hover:bg-green-600 transition-all"
+                  >
+                    Register
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         )}

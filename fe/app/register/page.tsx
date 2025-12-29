@@ -1,17 +1,11 @@
-import { Navbar } from "@/app/components/Navbar";
-import { Footer } from "@/app/components/Footer";
+"use client";
+
 import { RegisterForm } from "./RegisterForm";
 
 export default function Register() {
   return (
-    <main className="min-h-screen bg-midnight text-mist">
-      <Navbar />
-      
-      <div className="pt-32 pb-24 container mx-auto px-6 flex justify-center">
-        <RegisterForm />
-      </div>
-
-      <Footer />
+    <main className="min-h-screen bg-midnight text-mist flex items-center justify-center">
+      <RegisterForm />
     </main>
   );
 }
