@@ -16,6 +16,7 @@ export function LoginForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("LoginForm: Submit handler triggered");
     setError("");
     setIsLoading(true);
 
@@ -35,12 +36,22 @@ export function LoginForm() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to login");
+        throw new Error(errorData.error || errorData.message || "Failed to login");
       }
 
       const data = await response.json();
-      login(data.token, { id: data.user.id || data.id, email });
-      router.push("/");
+      console.log("LoginForm: Response data", data);
+      
+      // Ensure backend login handler returns `user` object now.
+      // If `data.user` is present, it will contain { id, email, role, ... }
+      const userData = data.user || { id: data.id, email };
+      login(data.token, userData);
+
+      if (userData.role === 'admin') {
+        router.push("/admin");
+      } else {
+        router.push("/");
+      }
     } catch (err) {
       console.error("Login error:", err);
       const errorMsg =
@@ -52,56 +63,77 @@ export function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-md">
-      <h1 className="font-serif text-3xl md:text-4xl text-white mb-8 text-center">
-        Login
-      </h1>
+    <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-8 duration-700">
+      <div className="bg-midnight/30 backdrop-blur-md border border-white/10 shadow-2xl p-8 md:p-10 rounded-2xl relative overflow-hidden group/card">
+        {/* Decorative elements */}
+        <div className="absolute -top-24 -right-24 w-48 h-48 bg-gold/5 rounded-full blur-3xl group-hover/card:bg-gold/10 transition-colors duration-1000" />
+        <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-blue-500/5 rounded-full blur-3xl group-hover/card:bg-blue-500/10 transition-colors duration-1000" />
 
-      {error && (
-        <div className="p-4 bg-red-500/20 border border-red-500 rounded mb-6 text-red-400 text-sm">
-          {error}
+        <h1 className="font-serif text-3xl md:text-4xl text-white mb-2 text-center tracking-wide">
+          Welcome Back
+        </h1>
+        <p className="text-gray-400 text-center mb-8 text-sm uppercase tracking-widest">
+            Enter your details to access your account
+        </p>
+
+        {error && (
+            <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg mb-6 flex flex-col items-center animate-in fade-in zoom-in-95">
+            <p className="text-red-400 text-sm text-center">{error}</p>
+            </div>
+        )}
+
+        <form className="space-y-6" onSubmit={handleSubmit}>
+            <div className="group">
+            <label className="block text-xs font-medium text-gray-400 mb-1 ml-1 uppercase tracking-wider group-focus-within:text-gold transition-colors duration-300">Email Address</label>
+            <input
+                type="email"
+                required
+                disabled={isLoading}
+                className="w-full bg-black/20 border border-white/10 border-b-white/20 p-4 text-sm text-white placeholder-gray-600 focus:border-gold focus:border-b-gold focus:ring-0 focus:outline-none rounded-lg transition-all duration-300 hover:bg-black/30"
+                placeholder="name@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+            />
+            </div>
+            <div className="group">
+            <div className="flex justify-between mb-1 ml-1">
+                <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider group-focus-within:text-gold transition-colors duration-300">Password</label>
+                <a href="#" className="text-xs text-gray-500 hover:text-gold transition-colors">
+                Forgot Password?
+                </a>
+            </div>
+            <input
+                type="password"
+                required
+                disabled={isLoading}
+                className="w-full bg-black/20 border border-white/10 border-b-white/20 p-4 text-sm text-white placeholder-gray-600 focus:border-gold focus:border-b-gold focus:ring-0 focus:outline-none rounded-lg transition-all duration-300 hover:bg-black/30"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+            />
+            </div>
+
+            <Button 
+                className="w-full py-4 text-sm font-bold tracking-widest uppercase transition-all duration-500 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(212,175,55,0.2)] bg-gradient-to-r from-gold to-amber-600 text-midnight" 
+                disabled={isLoading} 
+                type="submit"
+            >
+            {isLoading ? (
+                <span className="flex items-center justify-center gap-2">
+                    <span className="w-2 h-2 bg-midnight rounded-full animate-bounce [animation-delay:-0.3s]" />
+                    <span className="w-2 h-2 bg-midnight rounded-full animate-bounce [animation-delay:-0.15s]" />
+                    <span className="w-2 h-2 bg-midnight rounded-full animate-bounce" />
+                </span>
+            ) : "Sign In"}
+            </Button>
+        </form>
+
+        <div className="mt-8 pt-6 border-t border-white/5 text-center text-sm text-gray-400">
+            Don&apos;t have an account?{" "}
+            <Link href="/register" className="text-gold font-medium hover:text-white transition-colors hover:underline decoration-gold/50 underline-offset-4">
+            Create Account
+            </Link>
         </div>
-      )}
-
-      <form className="space-y-6" onSubmit={handleSubmit}>
-        <div>
-          <label className="block text-sm text-gray-400 mb-2">Email</label>
-          <input
-            type="email"
-            required
-            disabled={isLoading}
-            className="w-full bg-white/5 border border-white/10 p-3 text-sm focus:border-gold focus:outline-none rounded-sm transition-colors disabled:opacity-50"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
-        <div>
-          <div className="flex justify-between mb-2">
-            <label className="block text-sm text-gray-400">Password</label>
-            <a href="#" className="text-xs text-gold hover:underline">
-              Forgot?
-            </a>
-          </div>
-          <input
-            type="password"
-            required
-            disabled={isLoading}
-            className="w-full bg-white/5 border border-white/10 p-3 text-sm focus:border-gold focus:outline-none rounded-sm transition-colors disabled:opacity-50"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-
-        <Button className="w-full" size="lg" disabled={isLoading}>
-          {isLoading ? "Signing in..." : "Sign In"}
-        </Button>
-      </form>
-
-      <div className="mt-8 text-center text-sm text-gray-400">
-        Don&apos;t have an account?{" "}
-        <Link href="/register" className="text-gold hover:underline">
-          Create one
-        </Link>
       </div>
     </div>
   );

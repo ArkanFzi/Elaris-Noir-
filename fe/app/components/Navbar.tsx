@@ -1,19 +1,21 @@
 "use client";
 
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ShoppingBag, Menu, X, Search, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/app/context/CartContext";
 import { useSearch } from "@/app/context/SearchContext";
-import { AuthContext } from "../../context/AuthContext";
+import { useAuth } from "@/app/context/AuthContext";
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { toggleCart, cartCount } = useCart();
   const { openSearch } = useSearch();
-  const { token, user, logout } = useContext(AuthContext);
+  const { token, user, logout } = useAuth();
+
+  console.log("Navbar: Render", { token, user });
 
   useEffect(() => {
     const handleScroll = () => {
@@ -91,27 +93,38 @@ export function Navbar() {
         <div className="hidden md:flex items-center gap-4">
           {token ? (
             <>
-              <span className="text-sm text-mist">
-                Welcome, {user?.firstName} {user?.lastName}
-              </span>
-              <button
-                onClick={logout}
-                className="px-4 py-2 bg-red-500 text-midnight rounded hover:bg-red-600 transition-all"
-              >
-                Logout
-              </button>
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-mist hidden lg:inline-block">
+                  Hi, {user?.first_name}
+                </span>
+                <Link
+                  href={user?.role === "admin" ? "/admin" : "/account"}
+                  className="flex items-center gap-2 text-mist hover:text-gold transition-colors"
+                  title="Profile"
+                >
+                  <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/20">
+                    <span className="font-serif text-sm">{user?.first_name?.[0]}</span>
+                  </div>
+                </Link>
+                <button
+                  onClick={logout}
+                  className="text-xs uppercase tracking-widest text-gray-500 hover:text-red-500 transition-colors ml-2"
+                >
+                  Logout
+                </button>
+              </div>
             </>
           ) : (
             <>
               <Link
                 href="/login"
-                className="px-4 py-2 bg-gold text-midnight rounded hover:bg-gold-light transition-all"
+                className="text-sm uppercase tracking-widest text-mist hover:text-gold transition-colors"
               >
                 Login
               </Link>
               <Link
                 href="/register"
-                className="px-4 py-2 bg-gold text-midnight rounded hover:bg-gold-light transition-all"
+                className="px-6 py-2 bg-gold text-midnight text-sm uppercase tracking-widest font-bold hover:bg-white transition-colors"
               >
                 Register
               </Link>
@@ -156,25 +169,47 @@ export function Navbar() {
               </button>
             </div>
             {/* Auth Buttons - Mobile */}
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 w-full px-6">
               {token ? (
-                <button
-                  onClick={logout}
-                  className="w-full px-4 py-2 bg-red-500 rounded text-center text-sm font-semibold hover:bg-red-600 transition-all"
-                >
-                  Logout
-                </button>
+                <>
+                  <div className="flex items-center gap-3 justify-center mb-4">
+                    <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-gold font-serif text-lg">
+                      {user?.first_name?.[0]}
+                    </div>
+                    <span className="text-mist">
+                      {user?.first_name} {user?.last_name}
+                    </span>
+                  </div>
+                  <Link
+                     href={user?.role === "admin" ? "/admin" : "/account"}
+                     className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded text-center text-mist hover:text-gold transition-colors uppercase tracking-widest text-sm"
+                     onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    My Profile
+                  </Link>
+                  <button
+                    onClick={() => {
+                      logout();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full px-4 py-3 bg-red-500/10 border border-red-500/20 rounded text-center text-red-400 hover:bg-red-500/20 transition-colors uppercase tracking-widest text-sm"
+                  >
+                    Logout
+                  </button>
+                </>
               ) : (
                 <>
                   <Link
                     href="/login"
-                    className="w-full px-4 py-2 bg-blue-500 rounded text-center text-sm font-semibold hover:bg-blue-600 transition-all"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="w-full px-4 py-3 border border-white/20 rounded text-center text-white hover:border-gold hover:text-gold transition-colors uppercase tracking-widest text-sm"
                   >
                     Login
                   </Link>
                   <Link
                     href="/register"
-                    className="w-full px-4 py-2 bg-green-500 rounded text-center text-sm font-semibold hover:bg-green-600 transition-all"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="w-full px-4 py-3 bg-gold text-midnight rounded text-center text-sm font-bold uppercase tracking-widest hover:bg-white transition-colors"
                   >
                     Register
                   </Link>

@@ -2,10 +2,18 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 
+interface User {
+  id: string;
+  email: string;
+  first_name?: string;
+  last_name?: string;
+  role?: string;
+}
+
 interface AuthContextType {
   token: string | null;
-  user: { id: string; email: string } | null;
-  login: (token: string, user: { id?: string; email: string }) => void;
+  user: User | null;
+  login: (token: string, user: User) => void;
   logout: () => void;
   isLoading: boolean;
 }
@@ -16,25 +24,35 @@ export const AuthContext = createContext<AuthContextType | undefined>(
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
-  const [user, setUser] = useState<{ id: string; email: string } | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Load auth state from localStorage on mount
   useEffect(() => {
     const storedToken = localStorage.getItem("authToken");
     const storedUser = localStorage.getItem("authUser");
+    console.log("AuthProvider: Initial load", { storedToken, storedUser });
     if (storedToken && storedUser) {
       setToken(storedToken);
-      setUser(JSON.parse(storedUser));
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (e) {
+        console.error("Failed to parse user data", e);
+      }
     }
     setIsLoading(false);
   }, []);
 
-  const login = (newToken: string, newUser: { id?: string; email: string }) => {
+  const login = (newToken: string, newUser: User) => {
+    console.log("AuthProvider: Login called", newUser);
     setToken(newToken);
+    // Ensure all fields are preserved
     const userData = {
-      id: newUser.id || "unknown",
+      id: newUser.id,
       email: newUser.email,
+      first_name: newUser.first_name,
+      last_name: newUser.last_name,
+      role: newUser.role || "customer",
     };
     setUser(userData);
     localStorage.setItem("authToken", newToken);

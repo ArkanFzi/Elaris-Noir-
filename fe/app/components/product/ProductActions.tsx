@@ -17,7 +17,7 @@ interface ProductActionsProps {
 
 export function ProductActions({ product }: ProductActionsProps) {
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
-  const { toggleCart } = useCart();
+  const { toggleCart, addToCart } = useCart();
   
   const isWishlisted = isInWishlist(product.id);
 
@@ -30,8 +30,21 @@ export function ProductActions({ product }: ProductActionsProps) {
   };
 
   const handleAddToCart = () => {
-      // In a real app we'd add the specific item
-      toggleCart();
+    // Parse price string (e.g., "$180") to cents
+    // Basic parsing: remove non-digits.
+    const numericPrice = parseInt(product.price.toString().replace(/[^0-9]/g, ""));
+    // If string was "$180", we got 180. We need cents, so * 100.
+    // However, if the source was already cents (number), we might double multiply.
+    // Given the current static data is "$180", we assume it's dollars.
+    const priceCents = numericPrice * 100;
+
+    addToCart({
+      id: product.id.toString(),
+      name: product.name,
+      price_cents: priceCents,
+      image_url: product.image,
+      quantity: 1
+    });
   };
 
   return (
