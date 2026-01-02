@@ -3,16 +3,26 @@ import { Footer } from "@/app/components/Footer";
 import { ProductActions } from "@/app/components/product/ProductActions";
 import { ReviewsSection } from "@/app/components/product/ReviewsSection";
 import { RelatedProducts } from "@/app/components/product/RelatedProducts";
+import { getProduct } from "@/app/lib/api";
+import { notFound } from "next/navigation";
+import Image from "next/image";
 
 export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   
-  const product = {
-    name: "Midnight Bloom",
-    price: "$180",
-    description: "An intoxicating blend of night-blooming jasmine, dark amber, and rare woods. Designed for those who embrace the mystery of the evening.",
-    image: "https://images.unsplash.com/photo-1594121764658-00fc48a4365c?q=80&w=1000&auto=format&fit=crop"
-  };
+  let product;
+  try {
+    product = await getProduct(parseInt(id));
+  } catch (error) {
+    console.error("Failed to fetch product:", error);
+    return notFound();
+  }
+
+  if (!product) {
+    return notFound();
+  }
+
+  const formattedPrice = `$${(product.price_cents / 100).toFixed(2)}`;
 
   return (
     <main className="min-h-screen bg-midnight text-mist">
@@ -21,11 +31,13 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
       <div className="pt-32 pb-12 container mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-start">
           {/* Image Side - Sticky */}
-          <div className="md:sticky md:top-32 aspect-[4/5] bg-white/5 overflow-hidden">
-             <img 
-               src={product.image} 
+          <div className="md:sticky md:top-32 aspect-[4/5] bg-white/5 overflow-hidden relative">
+             <Image 
+               src={product.image_url} 
                alt={product.name}
-               className="w-full h-full object-cover"
+               fill
+               priority
+               className="object-cover"
              />
           </div>
 
@@ -33,37 +45,43 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
           <div className="space-y-12">
             <div className="space-y-6">
               <div>
-                 <p className="text-gold uppercase tracking-widest text-sm mb-2">Eau de Parfum</p>
+                 <p className="text-gold uppercase tracking-widest text-sm mb-2">{product.category}</p>
                  <h1 className="font-serif text-5xl md:text-6xl text-white mb-2">{product.name}</h1>
-                 <p className="text-2xl text-gold font-light">{product.price}</p>
+                 <p className="text-2xl text-gold font-light">{formattedPrice}</p>
               </div>
 
               <p className="text-gray-400 leading-relaxed font-light text-lg">
-                {product.description}
+                {product.description || "No description available for this exquisite fragrance."}
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                 <ProductActions product={{...product, id: id}} />
+                 <ProductActions product={{
+                   id: product.id,
+                   name: product.name,
+                   price: formattedPrice,
+                   image: product.image_url,
+                   category: product.category
+                 }} />
               </div>
             </div>
 
-            {/* Visual Notes Pyramid */}
+            {/* Visual Notes Pyramid (Dynamic if fields exist, otherwise fallback) */}
             <div className="border-t border-white/10 pt-8">
               <h3 className="font-serif text-xl text-white mb-6">Olfactory Pyramid</h3>
               <div className="bg-white/5 p-8 rounded-sm space-y-6 text-center">
                   <div>
                       <span className="text-xs uppercase tracking-widest text-gold mb-2 block">Top Notes</span>
-                      <p className="text-mist font-light">Bergamot, Black Pepper</p>
+                      <p className="text-mist font-light">{product.top_notes || "Bergamot, Black Pepper"}</p>
                   </div>
                   <div className="w-2/3 mx-auto border-t border-white/5 my-2"></div>
                   <div>
                       <span className="text-xs uppercase tracking-widest text-gold mb-2 block">Heart Notes</span>
-                      <p className="text-mist font-light">Night-Blooming Jasmine, Rose Absolute</p>
+                      <p className="text-mist font-light">{product.heart_notes || "Night-Blooming Jasmine, Rose Absolute"}</p>
                   </div>
                    <div className="w-2/3 mx-auto border-t border-white/5 my-2"></div>
                   <div>
                       <span className="text-xs uppercase tracking-widest text-gold mb-2 block">Base Notes</span>
-                      <p className="text-mist font-light">Dark Amber, Oud, Vanilla Bean</p>
+                      <p className="text-mist font-light">{product.base_notes || "Dark Amber, Oud, Vanilla Bean"}</p>
                   </div>
               </div>
             </div>
@@ -95,7 +113,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
 
       <div className="container mx-auto px-6">
          <ReviewsSection />
-         <RelatedProducts />
+         <RelatedProducts currentProductId={id} />
       </div>
 
       <Footer />

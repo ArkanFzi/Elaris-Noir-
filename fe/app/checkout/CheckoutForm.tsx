@@ -6,9 +6,10 @@ import { useAuth } from "@/app/context/AuthContext";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { createOrder } from "@/app/lib/api";
 
 export function CheckoutForm() {
-  const { cartCount, closeCart, cartItems } = useCart();
+  const { cartCount, closeCart, cartItems, totalAmount, clearCart } = useCart();
   const { token } = useAuth();
   const router = useRouter();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -45,20 +46,20 @@ export function CheckoutForm() {
     setErrorMessage(null);
 
     if (!validateForm()) return;
+    if (cartItems.length === 0) {
+      setErrorMessage("Your cart is empty.");
+      return;
+    }
 
     setIsProcessing(true);
 
     const orderData = {
       items: cartItems.map((item: CartItem) => ({
-        product_id: item.id,
+        product_id: parseInt(item.id),
         quantity: item.quantity,
       })),
       shipping_address: formData,
-      total_cents: cartItems.reduce(
-        (total: number, item: CartItem) =>
-          total + item.price_cents * item.quantity,
-        0
-      ),
+      total_cents: totalAmount,
     };
 
     try {
@@ -66,28 +67,12 @@ export function CheckoutForm() {
         throw new Error("You must be logged in to create an order");
       }
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      if (!apiUrl) {
-        throw new Error("API URL not configured");
-      }
-
-      const response = await fetch(`${apiUrl}/orders`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(orderData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to create order");
-      }
-
-      const result = await response.json();
-      console.log("Order created successfully", result);
-      router.push("/checkout/success"); // Redirect to success page
+      await createOrder(orderData, token);
+      
+      // Clear cart on success
+      clearCart();
+      
+      router.push("/checkout/success");
     } catch (error: unknown) {
       const errorMessage =
         error instanceof Error
@@ -122,7 +107,7 @@ export function CheckoutForm() {
 
           <div className="space-y-4">
             <h2 className="font-serif text-2xl text-white">Shipping Address</h2>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               <input
                 type="text"
                 name="full_name"
@@ -142,24 +127,26 @@ export function CheckoutForm() {
               required
               className="w-full bg-white/5 border border-white/10 p-3 text-sm focus:border-gold focus:outline-none rounded-sm transition-colors"
             />
-            <input
-              type="text"
-              name="city"
-              placeholder="City"
-              value={formData.city}
-              onChange={handleInputChange}
-              required
-              className="w-full bg-white/5 border border-white/10 p-3 text-sm focus:border-gold focus:outline-none rounded-sm transition-colors"
-            />
-            <input
-              type="text"
-              name="postal_code"
-              placeholder="Postal Code"
-              value={formData.postal_code}
-              onChange={handleInputChange}
-              required
-              className="w-full bg-white/5 border border-white/10 p-3 text-sm focus:border-gold focus:outline-none rounded-sm transition-colors"
-            />
+            <div className="grid grid-cols-2 gap-4">
+              <input
+                type="text"
+                name="city"
+                placeholder="City"
+                value={formData.city}
+                onChange={handleInputChange}
+                required
+                className="bg-white/5 border border-white/10 p-3 text-sm focus:border-gold focus:outline-none rounded-sm transition-colors"
+              />
+              <input
+                type="text"
+                name="postal_code"
+                placeholder="Postal Code"
+                value={formData.postal_code}
+                onChange={handleInputChange}
+                required
+                className="bg-white/5 border border-white/10 p-3 text-sm focus:border-gold focus:outline-none rounded-sm transition-colors"
+              />
+            </div>
             <input
               type="text"
               name="country"
@@ -190,7 +177,7 @@ export function CheckoutForm() {
             type="submit"
             size="lg"
             className="w-full"
-            disabled={isProcessing}
+            disabled={isProcessing || cartCount === 0}
           >
             {isProcessing ? "Processing..." : "Complete Order"}
           </Button>
@@ -200,26 +187,29 @@ export function CheckoutForm() {
         <div className="bg-white/5 p-8 rounded-sm h-fit">
           <h2 className="font-serif text-xl text-white mb-6">Order Summary</h2>
 
-          {cartCount === 0 ? (
+          {cartItems.length === 0 ? (
             <p className="text-gray-400 text-sm">Your cart is empty.</p>
           ) : (
             <div className="space-y-4 mb-6">
               {cartItems.map((item: CartItem) => (
                 <div key={item.id} className="flex gap-4 items-center">
-                  <div className="w-16 h-16 bg-midnight border border-white/10 rounded-sm overflow-hidden relative">
+                  <div className="w-16 h-20 bg-midnight border border-white/10 rounded-sm overflow-hidden relative">
                     <Image
                       src={item.image_url}
                       alt={item.name}
-                      crossOrigin="anonymous"
-                      layout="fill"
-                      objectFit="cover"
+                      fill
+                      className="object-cover"
                     />
-                    <span className="absolute top-0 right-0 bg-gold text-midnight text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full transform translate-x-1/2 -translate-y-1/2">
+                    <span className="absolute -top-2 -right-2 bg-gold text-midnight text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full z-10">
                       {item.quantity}
                     </span>
                   </div>
-                  <p className="text-sm text-white">
-                    ${(item.price_cents / 100).toFixed(2)}
+                  <div className="flex-1">
+                    <p className="text-sm text-white font-medium">{item.name}</p>
+                    <p className="text-xs text-gray-400">Qty: {item.quantity}</p>
+                  </div>
+                  <p className="text-sm text-gold">
+                    ${((item.price_cents * item.quantity) / 100).toFixed(2)}
                   </p>
                 </div>
               ))}
@@ -230,25 +220,17 @@ export function CheckoutForm() {
             <div className="flex justify-between text-gray-400">
               <span>Subtotal</span>
               <span>
-                $
-                {cartItems.reduce(
-                  (total: number, item: CartItem) => total + item.price_cents,
-                  0
-                )}
+                ${(totalAmount / 100).toFixed(2)}
               </span>
             </div>
             <div className="flex justify-between text-gray-400">
               <span>Shipping</span>
-              <span>Calculated at next step</span>
+              <span className="text-green-500 uppercase text-[10px] tracking-widest font-bold">Complimentary</span>
             </div>
             <div className="flex justify-between text-white font-medium text-lg pt-4 border-t border-white/10 mt-4">
               <span>Total</span>
               <span className="text-gold">
-                $
-                {cartItems.reduce(
-                  (total: number, item: CartItem) => total + item.price_cents,
-                  0
-                )}
+                ${(totalAmount / 100).toFixed(2)}
               </span>
             </div>
           </div>

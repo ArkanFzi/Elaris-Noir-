@@ -3,7 +3,7 @@
 import { useAuth } from "@/app/context/AuthContext";
 import Link from "next/link";
 import { Button } from "@/app/components/ui/Button";
-import { LayoutDashboard, Package, FileText, Users, MessageSquare, LogOut } from "lucide-react";
+import { LayoutDashboard, Package, FileText, Users, MessageSquare, LogOut, ShoppingCart } from "lucide-react";
 import { ProtectedRoute } from "@/app/components/auth/ProtectedRoute";
 
 export default function AdminLayout({
@@ -16,6 +16,7 @@ export default function AdminLayout({
   const adminLinks = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { name: "Products", href: "/admin/products", icon: Package },
+    { name: "Orders", href: "/admin/orders", icon: ShoppingCart },
     { name: "Articles", href: "/admin/articles", icon: FileText },
     { name: "Users", href: "/admin/users", icon: Users },
     { name: "Testimonials", href: "/admin/testimonials", icon: MessageSquare },

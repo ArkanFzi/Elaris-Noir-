@@ -3,23 +3,40 @@
 import { Navbar } from "@/app/components/Navbar";
 import { Footer } from "@/app/components/Footer";
 import { ProductCard } from "@/app/components/ui/ProductCard";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, ChevronDown } from "lucide-react";
 import { PageHero } from "@/app/components/ui/PageHero";
+import { getProducts } from "@/app/lib/api";
 
-const products = [
-  { id: 1, name: "Midnight Bloom", category: "Eau de Parfum", price: 180, image: "https://images.unsplash.com/photo-1594121764658-00fc48a4365c?q=80&w=1000&auto=format&fit=crop" },
-  { id: 2, name: "Golden Amber", category: "Eau de Parfum", price: 210, image: "https://images.unsplash.com/photo-1541643600914-78b084683601?q=80&w=1000&auto=format&fit=crop" },
-  { id: 3, name: "Velvet Rose", category: "Eau de Parfum", price: 195, image: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?q=80&w=1000&auto=format&fit=crop" },
-  { id: 4, name: "Noir Intense", category: "Parfum", price: 250, image: "https://images.unsplash.com/photo-1523293188086-b431e96000ec?q=80&w=1000&auto=format&fit=crop" },
-  { id: 5, name: "Eclat d'Or", category: "Eau de Toilette", price: 140, image: "https://images.unsplash.com/photo-1587017539504-67cfbddac569?q=80&w=1000&auto=format&fit=crop" },
-  { id: 6, name: "Mystique", category: "Eau de Parfum", price: 200, image: "https://images.unsplash.com/photo-1595166668700-128e448d3c16?q=80&w=2670&auto=format&fit=crop" },
-];
+type Product = {
+  id: number;
+  name: string;
+  category: string;
+  price_cents: number;
+  image_url: string;
+};
 
 export default function Collection() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortOption, setSortOption] = useState("Featured");
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const data = await getProducts();
+        setProducts(data || []);
+      } catch (error) {
+        console.error("Failed to fetch products:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const categories = ["All", "Eau de Parfum", "Parfum", "Eau de Toilette"];
 
@@ -31,8 +48,8 @@ export default function Collection() {
       return matchesSearch && matchesCategory;
     })
     .sort((a, b) => {
-      if (sortOption === "Price: Low to High") return a.price - b.price;
-      if (sortOption === "Price: High to Low") return b.price - a.price;
+      if (sortOption === "Price: Low to High") return a.price_cents - b.price_cents;
+      if (sortOption === "Price: High to Low") return b.price_cents - a.price_cents;
       return 0; // Featured order
     });
 
@@ -102,7 +119,11 @@ export default function Collection() {
       </div>
 
       <div className="container mx-auto px-6 pb-24">
-        {filteredProducts.length > 0 ? (
+        {loading ? (
+          <div className="text-center py-12">
+            <p className="text-gray-400">Loading products...</p>
+          </div>
+        ) : filteredProducts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
             {filteredProducts.map((product, index) => (
                 <ProductCard
@@ -110,15 +131,15 @@ export default function Collection() {
                     id={product.id}
                     title={product.name}
                     category={product.category}
-                    price={`$${product.price}`}
-                    image={product.image}
-                    delay={index * 0.05}
+                    price={`$${(product.price_cents / 100).toFixed(2)}`}
+                    image={product.image_url}
+                    delay={index * 0.1}
                 />
             ))}
             </div>
         ) : (
-            <div className="text-center py-24 text-gray-500">
-                <p>No fragrances found.</p>
+            <div className="text-center py-12">
+                <p className="text-gray-400">No products found matching your criteria.</p>
             </div>
         )}
       </div>

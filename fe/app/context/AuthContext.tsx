@@ -15,6 +15,7 @@ interface AuthContextType {
   user: User | null;
   login: (token: string, user: User) => void;
   logout: () => void;
+  updateUser: (user: Partial<User>) => void;
   isLoading: boolean;
 }
 
@@ -31,7 +32,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const storedToken = localStorage.getItem("authToken");
     const storedUser = localStorage.getItem("authUser");
-    console.log("AuthProvider: Initial load", { storedToken, storedUser });
     if (storedToken && storedUser) {
       setToken(storedToken);
       try {
@@ -44,9 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = (newToken: string, newUser: User) => {
-    console.log("AuthProvider: Login called", newUser);
     setToken(newToken);
-    // Ensure all fields are preserved
     const userData = {
       id: newUser.id,
       email: newUser.email,
@@ -66,8 +64,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem("authUser");
   };
 
+  const updateUser = (updatedFields: Partial<User>) => {
+    if (user) {
+      const newUser = { ...user, ...updatedFields };
+      setUser(newUser);
+      localStorage.setItem("authUser", JSON.stringify(newUser));
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ token, user, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ token, user, login, logout, updateUser, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
@@ -75,13 +81,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  // Return a default empty context if not within provider (for server rendering)
   if (context === undefined) {
     return {
       token: null,
       user: null,
       login: () => {},
       logout: () => {},
+      updateUser: () => {},
       isLoading: false,
     } as AuthContextType;
   }

@@ -81,6 +81,9 @@ func main() {
 	admin.HandleFunc("/dashboard/stats", h.GetDashboardStatsHandler).Methods("GET")
 	admin.HandleFunc("/users", h.GetAllUsersHandler).Methods("GET")
 	admin.HandleFunc("/users/{id}", h.DeleteUserHandler).Methods("DELETE")
+	admin.HandleFunc("/orders", h.GetAllOrdersHandler).Methods("GET")
+	admin.HandleFunc("/orders/{id}/status", h.UpdateOrderStatusHandler).Methods("PUT")
+	admin.HandleFunc("/orders/{id}", h.DeleteOrderHandler).Methods("DELETE")
 
 	// Start server
 	addr := ":8080"

@@ -1,35 +1,38 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { ProductCard } from "@/app/components/ui/ProductCard";
+import { getProducts } from "@/app/lib/api";
 
-const products = [
-  {
-    id: 1,
-    name: "Midnight Bloom",
-    category: "Eau de Parfum",
-    price: "$180",
-    image: "https://images.unsplash.com/photo-1594121764658-00fc48a4365c?q=80&w=1000&auto=format&fit=crop",
-  },
-  {
-    id: 2,
-    name: "Golden Amber",
-    category: "Eau de Parfum",
-    price: "$210",
-    image: "https://images.unsplash.com/photo-1541643600914-78b084683601?q=80&w=1000&auto=format&fit=crop",
-  },
-  {
-    id: 3,
-    name: "Velvet Rose",
-    category: "Eau de Parfum",
-    price: "$195",
-    image: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?q=80&w=1000&auto=format&fit=crop",
-  },
-];
+type Product = {
+  id: number;
+  name: string;
+  category: string;
+  price_cents: number;
+  image_url: string;
+};
 
 export function Featured() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        const data = await getProducts();
+        setProducts(data ? data.slice(0, 3) : []);
+      } catch (error) {
+        console.error("Failed to fetch featured products:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFeatured();
+  }, []);
+
   return (
     <section className="py-24 md:py-32 bg-midnight">
       <div className="container mx-auto px-6">
@@ -43,19 +46,29 @@ export function Featured() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {products.map((product, index) => (
-             <ProductCard
-                key={product.id}
-                id={product.id}
-                title={product.name}
-                category={product.category}
-                price={product.price}
-                image={product.image}
-                delay={index * 0.1}
-            />
-          ))}
-        </div>
+        {loading ? (
+          <div className="text-center py-20">
+            <p className="text-gray-400">Curating our selection...</p>
+          </div>
+        ) : products.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {products.map((product, index) => (
+               <ProductCard
+                  key={product.id}
+                  id={product.id}
+                  title={product.name}
+                  category={product.category}
+                  price={`$${(product.price_cents / 100).toFixed(2)}`}
+                  image={product.image_url}
+                  delay={index * 0.1}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-20">
+            <p className="text-gray-400">Discoveries coming soon.</p>
+          </div>
+        )}
         
         <div className="mt-12 text-center md:hidden">
           <Link href="/collection" className="inline-flex items-center gap-2 text-gold hover:text-white transition-colors uppercase text-sm tracking-widest">

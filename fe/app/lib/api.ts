@@ -125,3 +125,22 @@ export async function addAddress(data: any, token: string) {
 export async function getAddresses(token: string) {
   return apiCall("/addresses", {}, token);
 }
+
+// Admin Orders
+export async function getAllOrders(token: string, filters?: { status?: string; search?: string; page?: number; limit?: number }) {
+  let url = "/orders?";
+  if (filters?.status) url += `status=${filters.status}&`;
+  if (filters?.search) url += `search=${filters.search}&`;
+  if (filters?.page) url += `page=${filters.page}&`;
+  if (filters?.limit) url += `limit=${filters.limit}&`;
+  return apiCall(url, {}, token);
+}
+
+export async function updateOrderStatus(id: number, status: string, token: string) {
+  return apiCall(`/orders/${id}/status`, { method: "PUT", body: JSON.stringify({ status }) }, token);
+}
+
+export async function deleteOrder(id: number, token: string) {
+  return apiCall(`/orders/${id}`, { method: "DELETE" }, token);
+}
+
