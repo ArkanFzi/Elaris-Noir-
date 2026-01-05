@@ -151,7 +151,12 @@ export default function ArticlesManagement() {
                   </p>
 
                   <div className="flex items-center gap-2">
-                    <Button size="sm" variant="outline" className="flex-1">
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="flex-1"
+                      onClick={() => window.open(`/journal/${article.id}`, "_blank")}
+                    >
                       <Eye className="w-3 h-3 mr-1" />
                       View
                     </Button>

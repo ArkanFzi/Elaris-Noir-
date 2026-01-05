@@ -5,6 +5,7 @@ import { Navbar } from "@/app/components/Navbar";
 import { Footer } from "@/app/components/Footer";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
+import Image from "next/image";
 import { PageHero } from "@/app/components/ui/PageHero";
 import { getArticles } from "@/app/lib/api";
 
@@ -66,12 +67,13 @@ export default function Journal() {
             {articles.map((article) => (
               <div key={article.id} className="group cursor-pointer">
                 <div className="aspect-[4/3] overflow-hidden mb-6 bg-white/5 relative">
-                  <img 
+                  <Image 
                     src={article.image_url} 
                     alt={article.title} 
+                    fill
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-100"
                   />
-                  <div className="absolute top-4 left-4 bg-midnight/80 px-3 py-1 text-[10px] uppercase tracking-widest text-gold backdrop-blur-md">
+                  <div className="absolute top-4 left-4 bg-midnight/80 px-3 py-1 text-[10px] uppercase tracking-widest text-gold backdrop-blur-md z-10">
                     {article.category}
                   </div>
                 </div>

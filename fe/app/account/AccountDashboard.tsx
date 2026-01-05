@@ -4,14 +4,26 @@ import { Button } from "@/app/components/ui/Button";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/app/context/AuthContext";
-import { apiCall, getOrders } from "@/app/lib/api";
+import { apiCall, getOrders, getArticles } from "@/app/lib/api";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+
+type Article = {
+  id: number;
+  title: string;
+  excerpt: string;
+  category: string;
+  image_url: string;
+  published_at: string;
+};
 
 export function AccountDashboard() {
   const { user, token, logout, updateUser } = useAuth();
   const router = useRouter();
-  const [activeTab, setActiveTab ] = useState<"overview" | "orders" | "addresses" | "profile">("overview");
+  const [activeTab, setActiveTab ] = useState<"overview" | "orders" | "addresses" | "profile" | "journals">("overview");
   const [stats, setStats] = useState({ orderCount: 0 });
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [articlesLoading, setArticlesLoading] = useState(false);
   const [profileData, setProfileData] = useState({
     first_name: user?.first_name || "",
     last_name: user?.last_name || "",
@@ -43,6 +55,23 @@ export function AccountDashboard() {
     };
     fetchStats();
   }, [token]);
+
+  useEffect(() => {
+    if (activeTab === "journals" && articles.length === 0) {
+      const fetchArticles = async () => {
+        setArticlesLoading(true);
+        try {
+          const data = await getArticles("published");
+          setArticles(data || []);
+        } catch (error) {
+          console.error("Failed to fetch articles:", error);
+        } finally {
+          setArticlesLoading(false);
+        }
+      };
+      fetchArticles();
+    }
+  }, [activeTab, articles.length]);
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,6 +124,12 @@ export function AccountDashboard() {
                     className={cn("w-full text-left px-4 py-3 text-sm transition-colors rounded-sm", activeTab === "profile" ? "bg-white/10 text-gold font-medium" : "text-gray-400 hover:text-white")}
                 >
                     Profile Settings
+                </button>
+                <button 
+                    onClick={() => setActiveTab("journals")}
+                    className={cn("w-full text-left px-4 py-3 text-sm transition-colors rounded-sm", activeTab === "journals" ? "bg-white/10 text-gold font-medium" : "text-gray-400 hover:text-white")}
+                >
+                    Journals
                 </button>
                 <button 
                     onClick={handleLogout}
@@ -191,6 +226,53 @@ export function AccountDashboard() {
                                 {isUpdating ? "Saving..." : "Save Changes"}
                             </Button>
                         </form>
+                    </div>
+                )}
+
+                {activeTab === "journals" && (
+                    <div className="space-y-6">
+                      <h2 className="font-serif text-2xl text-white">The Journal</h2>
+                      <p className="text-gray-400 text-sm">Latest stories and inspirations from Elaris Noir.</p>
+                      
+                      {articlesLoading ? (
+                        <div className="text-center py-12">
+                          <p className="text-gold animate-pulse">Loading journals...</p>
+                        </div>
+                      ) : articles.length === 0 ? (
+                        <div className="text-center py-12 bg-midnight border border-white/5 rounded-sm">
+                          <p className="text-gray-400">No journals found.</p>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                          {articles.map((article) => (
+                            <div key={article.id} className="bg-midnight border border-white/10 rounded-sm overflow-hidden group">
+                              <div className="aspect-video relative overflow-hidden">
+                                <Image 
+                                  src={article.image_url} 
+                                  alt={article.title}
+                                  fill
+                                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                />
+                                <div className="absolute top-2 left-2 bg-midnight/80 px-2 py-0.5 text-[9px] uppercase tracking-widest text-gold z-10">
+                                  {article.category}
+                                </div>
+                              </div>
+                              <div className="p-4">
+                                <h3 className="font-serif text-white text-lg mb-2 line-clamp-1 group-hover:text-gold transition-colors">{article.title}</h3>
+                                <p className="text-gray-400 text-xs line-clamp-2 mb-4 font-light">{article.excerpt}</p>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="w-full text-[10px] uppercase tracking-widest"
+                                  onClick={() => router.push(`/journal/${article.id}`)}
+                                >
+                                  Read Article
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                 )}
             </div>
