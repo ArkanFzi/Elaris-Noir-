@@ -1,0 +1,26 @@
+services:
+  elaris-be:
+    build: ./be
+    container_name: elaris-be
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    ports:
+      - "127.0.0.1:8088:8080"
+    env_file:
+      - ./be/.env
+    restart: always
+
+  elaris-fe:
+    build: ./fe
+    container_name: elaris-fe
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+    ports:
+      - "127.0.0.1:3005:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=https://elarisnoir.my.id/api
+    restart: always

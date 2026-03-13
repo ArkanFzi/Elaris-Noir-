@@ -1,0 +1,25 @@
+# Caddyfile untuk Elaris Noir
+# Konfigurasi spesifik domain tanpa wildcard agar tidak bentrok dengan service port 80 lainnya
+
+elarisnoir.my.id, www.elarisnoir.my.id {
+    # Performa kompresi modern untuk luxury experience & fast LCP
+    encode gzip zstd
+
+    # Header Keamanan
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        X-XSS-Protection "1; mode=block"
+    }
+
+    # Proxy untuk Backend (Golang API)
+    handle /api/* {
+        reverse_proxy localhost:8088
+    }
+
+    # Proxy untuk Frontend (Next.js)
+    handle /* {
+        reverse_proxy localhost:3005
+    }
+}

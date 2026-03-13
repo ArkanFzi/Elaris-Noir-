@@ -1,0 +1,6 @@
+.git
+.env
+main
+cmd/api/main  # Jika ada binary sisa build lokal
+bin/
+obj/

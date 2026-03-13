@@ -3,21 +3,21 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
+import { useToast } from "@/app/context/ToastContext";
 import { Button } from "@/app/components/ui/Button";
 import Link from "next/link";
 
 export function LoginForm() {
   const router = useRouter();
   const { login } = useAuth();
+  const { showToast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("LoginForm: Submit handler triggered");
-    setError("");
     setIsLoading(true);
 
     try {
@@ -41,11 +41,13 @@ export function LoginForm() {
 
       const data = await response.json();
       console.log("LoginForm: Response data", data);
-      
+
       // Ensure backend login handler returns `user` object now.
       // If `data.user` is present, it will contain { id, email, role, ... }
       const userData = data.user || { id: data.id, email };
       login(data.token, userData);
+
+      showToast("Signed in successfully. Welcome to Elaris Noir.", "success");
 
       if (userData.role === 'admin') {
         router.push("/admin");
@@ -56,7 +58,7 @@ export function LoginForm() {
       console.error("Login error:", err);
       const errorMsg =
         err instanceof Error ? err.message : "Login failed. Please try again.";
-      setError(errorMsg);
+      showToast(errorMsg, "error");
     } finally {
       setIsLoading(false);
     }
@@ -73,66 +75,60 @@ export function LoginForm() {
           Welcome Back
         </h1>
         <p className="text-gray-400 text-center mb-8 text-sm uppercase tracking-widest">
-            Enter your details to access your account
+          Enter your details to access your account
         </p>
 
-        {error && (
-            <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg mb-6 flex flex-col items-center animate-in fade-in zoom-in-95">
-            <p className="text-red-400 text-sm text-center">{error}</p>
-            </div>
-        )}
-
         <form className="space-y-6" onSubmit={handleSubmit}>
-            <div className="group">
+          <div className="group">
             <label className="block text-xs font-medium text-gray-400 mb-1 ml-1 uppercase tracking-wider group-focus-within:text-gold transition-colors duration-300">Email Address</label>
             <input
-                type="email"
-                required
-                disabled={isLoading}
-                className="w-full bg-black/20 border border-white/10 border-b-white/20 p-4 text-sm text-white placeholder-gray-600 focus:border-gold focus:border-b-gold focus:ring-0 focus:outline-none rounded-lg transition-all duration-300 hover:bg-black/30"
-                placeholder="name@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+              type="email"
+              required
+              disabled={isLoading}
+              className="w-full bg-black/20 border border-white/10 border-b-white/20 p-4 text-sm text-white placeholder-gray-600 focus:border-gold focus:border-b-gold focus:ring-0 focus:outline-none rounded-lg transition-all duration-300 hover:bg-black/30"
+              placeholder="name@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
-            </div>
-            <div className="group">
+          </div>
+          <div className="group">
             <div className="flex justify-between mb-1 ml-1">
-                <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider group-focus-within:text-gold transition-colors duration-300">Password</label>
-                <a href="#" className="text-xs text-gray-500 hover:text-gold transition-colors">
+              <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider group-focus-within:text-gold transition-colors duration-300">Password</label>
+              <a href="#" className="text-xs text-gray-500 hover:text-gold transition-colors">
                 Forgot Password?
-                </a>
+              </a>
             </div>
             <input
-                type="password"
-                required
-                disabled={isLoading}
-                className="w-full bg-black/20 border border-white/10 border-b-white/20 p-4 text-sm text-white placeholder-gray-600 focus:border-gold focus:border-b-gold focus:ring-0 focus:outline-none rounded-lg transition-all duration-300 hover:bg-black/30"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+              type="password"
+              required
+              disabled={isLoading}
+              className="w-full bg-black/20 border border-white/10 border-b-white/20 p-4 text-sm text-white placeholder-gray-600 focus:border-gold focus:border-b-gold focus:ring-0 focus:outline-none rounded-lg transition-all duration-300 hover:bg-black/30"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
-            </div>
+          </div>
 
-            <Button 
-                className="w-full py-4 text-sm font-bold tracking-widest uppercase transition-all duration-500 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(212,175,55,0.2)] bg-gradient-to-r from-gold to-amber-600 text-midnight" 
-                disabled={isLoading} 
-                type="submit"
-            >
+          <Button
+            className="w-full py-4 text-sm font-bold tracking-widest uppercase transition-all duration-500 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(212,175,55,0.2)] bg-gradient-to-r from-gold to-amber-600 text-midnight"
+            disabled={isLoading}
+            type="submit"
+          >
             {isLoading ? (
-                <span className="flex items-center justify-center gap-2">
-                    <span className="w-2 h-2 bg-midnight rounded-full animate-bounce [animation-delay:-0.3s]" />
-                    <span className="w-2 h-2 bg-midnight rounded-full animate-bounce [animation-delay:-0.15s]" />
-                    <span className="w-2 h-2 bg-midnight rounded-full animate-bounce" />
-                </span>
+              <span className="flex items-center justify-center gap-2">
+                <span className="w-2 h-2 bg-midnight rounded-full animate-bounce [animation-delay:-0.3s]" />
+                <span className="w-2 h-2 bg-midnight rounded-full animate-bounce [animation-delay:-0.15s]" />
+                <span className="w-2 h-2 bg-midnight rounded-full animate-bounce" />
+              </span>
             ) : "Sign In"}
-            </Button>
+          </Button>
         </form>
 
         <div className="mt-8 pt-6 border-t border-white/5 text-center text-sm text-gray-400">
-            Don&apos;t have an account?{" "}
-            <Link href="/register" className="text-gold font-medium hover:text-white transition-colors hover:underline decoration-gold/50 underline-offset-4">
+          Don&apos;t have an account?{" "}
+          <Link href="/register" className="text-gold font-medium hover:text-white transition-colors hover:underline decoration-gold/50 underline-offset-4">
             Create Account
-            </Link>
+          </Link>
         </div>
       </div>
     </div>
