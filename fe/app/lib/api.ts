@@ -1,4 +1,8 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
+const isServer = typeof window === 'undefined';
+const API_BASE_URL = isServer
+  ? "http://elaris-be:8080/api"
+  : "/api";
+
 
 export async function apiCall(
   endpoint: string,
